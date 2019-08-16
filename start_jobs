@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Roda os jobs
 bundle exec sidekiq -q emails
