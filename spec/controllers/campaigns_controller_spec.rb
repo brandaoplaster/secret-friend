@@ -44,6 +44,31 @@ RSpec.describe CampaignsController, type: :controller do
 
   end
 
+  describe "POST #create" do
+    before(:each) do
+      @campaign_attributes = attributes_for(:campaign, user: @current_user)
+      post :create, params: {campaign: @campaign_attributes}
+    end
+
+    it "Redirect to new campaign" do
+      expect(response).to have_http_status(302)
+      expect(response).to redirect_to("/campaigns/#{Campaign.last.id}")
+    end
+
+    it "Create campaign with right attributes" do
+      expect(Campaign.last.user).to eql(@current_user)
+      expect(Campaign.last.title).to eql(@campaign_attributes)
+      expect(Campaign.last.description).to eql(@campaign_attributes[:description])
+      expect(Campaign.last.status).to eql('pending')
+    end
+
+    it "Create campaign with owner associated as a member" do
+      expect(Campaign.last.member.last.name).to eql(@current_user.name)
+      expect(Campaign.last.member.last.email).to eql(@current_user.email)
+    end
+
+  end
+
   describe "GET #create" do
     it "returns http success" do
       get :create
