@@ -2,6 +2,14 @@ require 'rails_helper'
 
 RSpec.describe CampaignsController, type: :controller do
 
+  include Devise::Test::ControllerHelpers
+
+  before(:each) do
+    @request.env["devise.mapping"] = Devise.mapping[:user]
+    @current_user = FactoryBot.create(:user)
+    sign_in @current_user
+  end
+
   describe "GET #show" do
     it "returns http success" do
       get :show
