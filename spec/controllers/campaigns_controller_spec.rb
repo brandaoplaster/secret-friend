@@ -91,6 +91,29 @@ RSpec.describe CampaignsController, type: :controller do
     end
   end
 
+  describe "PUT #update" do
+    before(:each) do
+      @new_campaign_attributes = attributes_for(:campaign)
+      request.env["HTTP_ACCEPT"] = 'application/json'
+    end
+
+    context "User is the campaign Owner" do
+      before(:each) do
+        campaign = create(:campaign, user: @current_user)
+        put :update, params: {id: campaign.id}
+      end
+
+      it "returns http success" do
+        expect(response).to have_http_status(:success)
+      end
+
+      it "Campaign have the new attributes" do
+        expect(Campaign.last.title).to eq(@new_campaign_attributes[:title])
+        expect(Campaign.last.description).to eq(@new_campaign_attributes[:description])
+      end
+    end
+  end
+
   describe "GET #raffle" do
     it "returns http success" do
       get :raffle
