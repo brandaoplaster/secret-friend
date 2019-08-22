@@ -124,10 +124,50 @@ RSpec.describe CampaignsController, type: :controller do
   end
 
   describe "GET #raffle" do
-    it "returns http success" do
-      get :raffle
-      expect(response).to have_http_status(:success)
+
+    before(:each) do
+      request.env["HTTP_ACCEPT"] = 'application/json'
+    end
+
+    context "User is the Campaign Owner" do
+      before(:each) do
+        @campaign = create(:campaign, user: @current_user)
+      end
+
+      context "Has more than two members" do
+        before(:each) do
+          create(:member, campaign: @campaign)
+          create(:member, campaign: @campaign)
+          create(:member, campaign: @campaign)
+          post :raffle, params: {id: @campaign.id}
+        end
+
+        it "returns http success" do
+          expect(response).to have_http_status(:success)
+        end
+      end
+
+      context "No more than two members" do
+        before(:each) do
+          create(:member, campaign: @campaign)
+          post :raffle, params: {id: @campaign.id}
+        end
+
+        it "returns http success" do
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+    end
+
+    context "User isn't the Campaign Owner" do
+      before(:each) do
+        @campaign = create(:campaign)
+        post :raffle, params: {id: @campaign.id}
+      end
+
+      it "returns http forbidden" do
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
-
 end
