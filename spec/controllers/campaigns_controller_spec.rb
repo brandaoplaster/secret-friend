@@ -69,24 +69,25 @@ RSpec.describe CampaignsController, type: :controller do
 
   end
 
-  describe "GET #create" do
-    it "returns http success" do
-      get :create
-      expect(response).to have_http_status(:success)
+  describe "DELETE #destroy" do
+    before(:each) do
+      request.env["HTTP_ACCEPT"] = 'application/json'
     end
-  end
 
-  describe "GET #update" do
-    it "returns http success" do
-      get :update
-      expect(response).to have_http_status(:success)
-    end
-  end
+    context "User is the Campaign Owner" do
+      it "return http success" do
+        campaign = create(:campaign, user: @current_user)
+        delete :destroy, params: {id: campaign.id}
+        expect(response).to have_http_status(:success)
+      end
 
-  describe "GET #destroy" do
-    it "returns http success" do
-      get :destroy
-      expect(response).to have_http_status(:success)
+      context "User isn't Campaign Owner" do
+        it "returns http forbidden" do
+          campaign = create(:campaign)
+          delete :destroy, params: {id: campaign.id}
+          expect(response).to have_http_status(:forbidden)
+        end
+      end
     end
   end
 
