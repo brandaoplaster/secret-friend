@@ -22,4 +22,23 @@ class CampaignsController < ApplicationController
 
   def raffle
   end
+
+  private
+
+  def camapaign_params
+    params.require(:campaign).permit(:title, :description).merge(user: current_user)
+  end
+
+  def set_campaign
+    @campaign = Campaign.find(params[:id])
+  end
+
+  def is_owner?
+    unless curent_user == @campaign.user
+      respond_to do |format|
+        format.json { render json: false, status: :forbidden }
+        format.html { redirect_to main_app.root_url }
+      end
+    end
+  end
 end
