@@ -28,7 +28,7 @@ class CampaignsController < ApplicationController
       if @campaign.update(campaign_params)
         format.json { render json: true }
       else
-        format.json { render json: @campaign.errors, status: :unprocessable_enty }
+        format.json { render json: @campaign.errors, status: :unprocessable_entify }
       end
     end
   end
@@ -42,6 +42,16 @@ class CampaignsController < ApplicationController
   end
 
   def raffle
+    respond_to do |format|
+      if @campaign.status != "pending"
+        format.json { render json: 'Já foi sorteada', status: :unprocessable_entify }
+      elsif @campaign.members.count < 3
+        format.json { render json: 'A campanha precisa de pelo menos 3 pessoas', status: :unprocessable_entity }
+      else
+        CampaignRaffleJob.perform_later @campaign
+        format.json { render json: true }
+      end
+    end
   end
 
   private
