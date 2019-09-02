@@ -1,3 +1,13 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  devise_for :users, :controllers => { registrations: 'registrations' }
+  mount Sidekiq::Web => '/sidekiq'
+
+  root to: 'pages#home'
+  resources :campaigns, except: [:new] do
+    post 'raffle', on: :member
+  end
+  get 'members/:token/opened', to: 'members#opened'
+  resources :members, only: [:create, :destroy, :update]
 end
