@@ -1,11 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe CampaignsController, type: :controller do
-
   include Devise::Test::ControllerHelpers
 
   before(:each) do
-    @request.env["devise.mapping"] = Devise.mapping[:user]
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     @current_user = FactoryBot.create(:user)
     sign_in @current_user
   end
@@ -19,19 +18,22 @@ RSpec.describe CampaignsController, type: :controller do
 
   describe "GET #show" do
 
-    context "campaign exists" do
-      it "Returns success" do
-        campaign = create(:campaign, user: @current_user)
-        get :show, params: {id: campaign.id}
-        expect(response).to have_http_status(:success)
+    context "campaing exists" do
+      context "User is the owner of the campaing" do
+        it "Returns success" do
+          campaign = create(:campaign, user: @current_user)
+          get :show, params: {id: campaign.id}
+          expect(response).to have_http_status(:success)
+        end
       end
-    end
 
-    context "User is not the owner of the campaign" do
-      it "Redirects to root" do
-        campaign = create(:campaign)
-        get :show, params: {id: campaign.id}
-        expect(response).to redirect_to('/')
+      context "User is not the owner of the campaign" do
+        it "Redirects to root" do
+          campaign = create(:campaign)
+          get :show, params: {id: campaign.id}
+
+          expect(response).to redirect_to('/')
+        end
       end
     end
 
@@ -41,8 +43,8 @@ RSpec.describe CampaignsController, type: :controller do
         expect(response).to redirect_to('/')
       end
     end
-
   end
+
 
   describe "POST #create" do
     before(:each) do
@@ -57,16 +59,15 @@ RSpec.describe CampaignsController, type: :controller do
 
     it "Create campaign with right attributes" do
       expect(Campaign.last.user).to eql(@current_user)
-      expect(Campaign.last.title).to eql(@campaign_attributes)
-      expect(Campaign.last.description).to eql(@campaign_attributes[:description])
+      expect(Campaign.last.title).to eql("Nova Campanha")
+      expect(Campaign.last.description).to eql("Descreva sua campanha...")
       expect(Campaign.last.status).to eql('pending')
     end
 
     it "Create campaign with owner associated as a member" do
-      expect(Campaign.last.member.last.name).to eql(@current_user.name)
-      expect(Campaign.last.member.last.email).to eql(@current_user.email)
+      expect(Campaign.last.members.last.name).to eql(@current_user.name)
+      expect(Campaign.last.members.last.email).to eql(@current_user.email)
     end
-
   end
 
   describe "DELETE #destroy" do
@@ -75,18 +76,18 @@ RSpec.describe CampaignsController, type: :controller do
     end
 
     context "User is the Campaign Owner" do
-      it "return http success" do
+      it "returns http success" do
         campaign = create(:campaign, user: @current_user)
         delete :destroy, params: {id: campaign.id}
         expect(response).to have_http_status(:success)
       end
+    end
 
-      context "User isn't Campaign Owner" do
-        it "returns http forbidden" do
-          campaign = create(:campaign)
-          delete :destroy, params: {id: campaign.id}
-          expect(response).to have_http_status(:forbidden)
-        end
+    context "User isn't the Campaign Owner" do
+      it "returns http forbidden" do
+        campaign = create(:campaign)
+        delete :destroy, params: {id: campaign.id}
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
@@ -97,10 +98,10 @@ RSpec.describe CampaignsController, type: :controller do
       request.env["HTTP_ACCEPT"] = 'application/json'
     end
 
-    context "User is the campaign Owner" do
+    context "User is the Campaign Owner" do
       before(:each) do
         campaign = create(:campaign, user: @current_user)
-        put :update, params: {id: campaign.id}
+        put :update, params: {id: campaign.id, campaign: @new_campaign_attributes}
       end
 
       it "returns http success" do
@@ -120,11 +121,9 @@ RSpec.describe CampaignsController, type: :controller do
         expect(response).to have_http_status(:forbidden)
       end
     end
-
   end
 
   describe "GET #raffle" do
-
     before(:each) do
       request.env["HTTP_ACCEPT"] = 'application/json'
     end
