@@ -24,6 +24,13 @@ class CampaignsController < ApplicationController
   end
 
   def update
+    respond_to do |format|
+      if @campaign.update(campaign_params)
+        format.json { render json: true }
+      else
+        format.json { render json: @campaign.errors, status: :unprocessable_enty }
+      end
+    end
   end
 
   def destroy
