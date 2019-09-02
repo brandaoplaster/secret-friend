@@ -34,6 +34,11 @@ class CampaignsController < ApplicationController
   end
 
   def destroy
+    @campaign.destroy
+
+    respond_to do |format|
+      format.json { render json: true }
+    end
   end
 
   def raffle
