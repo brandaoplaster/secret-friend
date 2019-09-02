@@ -12,13 +12,26 @@ class MembersController < ApplicationController
         format.json { render json: true }
       else
         format.json { render json: @member.errors, status: :unprocessable_entity }
-     end
+      end
+    end
   end
 
   def destroy
+    @member.destroy
+
+    respond_to do |format|
+      format.json { render json: true }
+    end
   end
 
   def update
+    respond_to do |format|
+      if @member.update(member_params)
+        format.json { render json: true }
+      else
+        format.json { render json: @member.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   private
