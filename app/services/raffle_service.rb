@@ -5,7 +5,7 @@ class RaffleService
   end
 
   def call
-    return false if @campaign.member.count < 3
+    return false if @campaign.members.count < 3
 
     results = {}
     members_list = @campaign.members
