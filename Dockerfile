@@ -1,4 +1,4 @@
-FROM ruby:2.5.1-slim
+FROM ruby:2.6.6
 
 # Instala nossas dependencias
 RUN apt-get update && apt-get install -qq -y --no-install-recommends \
